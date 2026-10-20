@@ -4,15 +4,14 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { openPreview, root } from './browser.mjs';
 
 const KEY = 'cleanframe.home.v1';
-const PRIMARY = ['stremio', 'netflix', 'disneyplus', 'youtube', 'appletv', 'primevideo', 'abciview', 'sbs', 'applemusic'];
-const IDS = ['IkWsFHtOY9.Stremio', 'org.tizen.netflix-app', 'MCmYXNxgcu.DisneyPlus', '9Ur5IzDKqV.TizenYouTube', 'com.samsung.tv.aria-video', 'org.tizen.primevideo', 'mWK87Xghap.ABCiview', 'OyE7OuxlUi.SBSOnDemand', 'org.tizen.apple.apple-music'];
-const NAMES = ['Stremio', 'Netflix', 'Disney+', 'YouTube', 'Apple TV', 'Prime Video', 'ABC iview', 'SBS On Demand', 'Apple Music'];
+const PRIMARY = ['livetv', 'youtubetv', 'youtube', 'primevideo', 'hbomax', 'hulu', 'netflix', 'disneyplus', 'appletv'];
+const IDS = ['org.tizen.tv-viewer', 'PvWgqxV3Xa.YouTubeTV', '9Ur5IzDKqV.TizenYouTube', 'org.tizen.primevideo', '5b8c3eb16b.BeamCTVDev', 'LBUAQX1exg.Hulu', 'org.tizen.netflix-app', 'MCmYXNxgcu.DisneyPlus', 'com.samsung.tv.aria-video'];
+const NAMES = ['Live TV', 'YouTube TV', 'YouTube', 'Prime Video', 'HBO Max', 'Hulu', 'Netflix', 'Disney+', 'Apple TV'];
 const EXTRA = 'AbCdEf1234.FamilyApp', SPOTIFY = 'rJeHak5zRg.Spotify';
 const UNSAFE_NAME = 'Family <img src=x onerror="window.__catalogXss=1"> & TV';
 const CATALOG = IDS.map((id, i) => ({ id, name: NAMES[i], show: true, iconPath: '' })).concat([
   { id: EXTRA, name: UNSAFE_NAME, show: true, iconPath: '' },
   { id: SPOTIFY, name: 'Spotify', show: true, iconPath: '' },
-  { id: '5b8c3eb16b.BeamCTVDev', name: 'HBO Max', show: true, iconPath: '' },
   { id: 'nClrkHome1.FrameHome', name: 'CleanFrame', show: true },
   { id: 'AbCdEf1234.worker', name: 'Background worker', show: true },
   { id: 'com.samsung.tv.cobalt-yt', name: 'YouTube', show: true }
@@ -237,14 +236,14 @@ try {
   await run('Real catalogue and native launch boundary', async () => {
     await page(); await library();
     const names = await current.locator('[data-action^="apps.open."] .label').allTextContents();
-    check('Consumer catalogue excludes services, self and duplicate YouTube', names.length === 12 && names.filter(n => n === 'YouTube').length === 1 && !names.includes('CleanFrame') && !names.includes('Background worker'), names);
+    check('Consumer catalogue excludes services, self and duplicate YouTube', names.length === 11 && names.filter(n => n === 'YouTube').length === 1 && !names.includes('CleanFrame') && !names.includes('Background worker'), names);
     check('Installed names stay text, including HTML punctuation', names.includes(UNSAFE_NAME) && !(await current.evaluate(() => window.__catalogXss)));
     check('Exploration fixtures do not appear', !names.includes('Plex') && !names.includes('Jellyfin'));
     await act('apps.open.' + SPOTIFY); await current.waitForFunction(() => __tv.calls.length > 0);
     check('Extra-brand app launches native ID', (await current.evaluate(() => __tv.calls.at(-1))).id === SPOTIFY);
     await current.evaluate(() => window.dispatchEvent(new Event('focus')));
     await scene('home'); await act('home.app.netflix'); await current.waitForFunction(() => __tv.calls.length === 2);
-    check('Primary app keeps verified target', (await current.evaluate(() => __tv.calls.at(-1))).id === IDS[1]);
+    check('Primary app keeps verified target', (await current.evaluate(() => __tv.calls.at(-1))).id === IDS[PRIMARY.indexOf('netflix')]);
     await current.evaluate(() => window.dispatchEvent(new Event('focus')));
     await act('util.art'); await current.waitForFunction(() => __tv.calls.length === 3);
     const art = await current.evaluate(() => __tv.calls.at(-1));
@@ -264,7 +263,7 @@ try {
     check('Catalogue failure leaves Home intact', same((await state()).dock, PRIMARY));
     await current.evaluate(() => { __tv.catalogFailure = false; }); await act('apps.retry');
     await current.waitForSelector('[data-action="apps.open.' + EXTRA + '"]');
-    check('Retry displays real installed names', (await current.locator('[data-action^="apps.open."]').count()) === 12);
+    check('Retry displays real installed names', (await current.locator('[data-action^="apps.open."]').count()) === 11);
   });
   await run('Native icon and failed-image fallback', async () => {
     await page({ catalog: CATALOG.map(a => a.id === EXTRA ? { ...a, iconPath: '/home/assets/icons/netflix.svg' } : a) });
@@ -302,10 +301,10 @@ try {
     await act('editor.move.netflix'); await nav('down'); check('Unfinished move does not write', same((await stored()).dock, start));
     await nav('back'); check('Back cancels unfinished move', same((await state()).dock, start));
     await act('editor.move.netflix'); await nav('down', 'ok');
-    const moved = start.slice(); [moved[1], moved[2]] = [moved[2], moved[1]];
+    const moved = start.slice(), at = start.indexOf('netflix'); [moved[at], moved[at + 1]] = [moved[at + 1], moved[at]];
     check('Placed move persists immediately', same((await stored()).dock, moved));
     await act('editor.add.' + EXTRA); check('Nine-app cap prevents addition', (await state()).dock.length === 9 && !(await state()).dock.includes(EXTRA));
-    await remove('stremio'); await act('editor.add.' + EXTRA);
+    await remove('livetv'); await act('editor.add.' + EXTRA);
     check('Native app can be pinned with stable ID', (await stored()).dock.includes(EXTRA) && (await state()).dock.length === 9);
     check('Native pin retains readable metadata for failed discovery', (await stored()).appRecords.some(a => a.id === EXTRA && a.name === UNSAFE_NAME));
     await current.reload(); await ready(); check('Native pin survives reload', (await state()).dock.includes(EXTRA));

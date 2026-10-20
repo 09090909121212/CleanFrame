@@ -14,17 +14,18 @@
   var FULL = 'Home holds nine apps. Remove one first.', LAST = 'Home needs one app';
 
   var PRIMARY_APPS = [
-    { id: 'stremio', name: 'Stremio', mark: true, appId: 'IkWsFHtOY9.Stremio' },
+    { id: 'livetv', name: 'Live TV', mark: true, appId: 'org.tizen.tv-viewer' },
+    { id: 'youtubetv', name: 'YouTube TV', mark: true, appId: 'PvWgqxV3Xa.YouTubeTV' },
+    { id: 'youtube', name: 'YouTube', mark: true, appId: '9Ur5IzDKqV.TizenYouTube' },
+    { id: 'primevideo', name: 'Prime Video', mark: true, appId: 'org.tizen.primevideo' },
+    { id: 'hbomax', name: 'HBO Max', mark: true, appId: '5b8c3eb16b.BeamCTVDev' },
+    { id: 'hulu', name: 'Hulu', mark: true, appId: 'LBUAQX1exg.Hulu' },
     { id: 'netflix', name: 'Netflix', mark: true, appId: 'org.tizen.netflix-app' },
     { id: 'disneyplus', name: 'Disney+', mark: true, appId: 'MCmYXNxgcu.DisneyPlus' },
-    { id: 'youtube', name: 'YouTube', mark: true, appId: '9Ur5IzDKqV.TizenYouTube' },
-    { id: 'appletv', name: 'Apple TV', mark: true, appId: 'com.samsung.tv.aria-video' },
-    { id: 'primevideo', name: 'Prime Video', mark: true, appId: 'org.tizen.primevideo' },
-    { id: 'abciview', name: 'ABC iview', mark: true, appId: 'mWK87Xghap.ABCiview' },
-    { id: 'sbs', name: 'SBS On Demand', mark: true, appId: 'OyE7OuxlUi.SBSOnDemand' },
-    { id: 'applemusic', name: 'Apple Music', mark: true, appId: 'org.tizen.apple.apple-music' }
+    { id: 'appletv', name: 'Apple TV', mark: true, appId: 'com.samsung.tv.aria-video' }
   ];
   var PRIMARY = PRIMARY_APPS.map(function (a) { return a.id; }), APPS = PRIMARY_APPS.slice(), ALPHA = [];
+  var DEFAULT_HOME = PRIMARY.slice(0, 6);
   var WALLS = window.CleanFrameWallpapers || [{ id: 'misty', name: 'Misty coast', tone: 'light', ut: { tr: 'mist', br: 'mist' }, frostVeil: .20 }];
   var ADAPTIVE_INK = window.CleanFrameAdaptiveInk || {};
   WALLS.forEach(function (w) { w.ut = w.ut || { tr: 'light', br: 'light' }; w.frostVeil = w.frostVeil || .12; });
@@ -338,7 +339,7 @@
       if (!app(id) && id.indexOf('.') > 0) APPS.push({ id: id, appId: id, name: id.split('.').pop(), mark: false });
       if (app(id)) h.push(id);
     });
-    if (!h.length) h = PRIMARY.slice();
+    if (!h.length) h = DEFAULT_HOME.slice();
     (Array.isArray(s.recent) ? s.recent : []).forEach(function (id) { if (safeId(id) && app(id) && h.indexOf(id) < 0 && recent.indexOf(id) < 0 && recent.length < 5) recent.push(id); });
     return {
       bg: pick(modern.bg, LOOK_VALUES.bg, legacyList ? 'dark' : 'photo'), layout: pick(modern.layout, LOOK_VALUES.layout, legacyList ? 'list' : 'dock'),
