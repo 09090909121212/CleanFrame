@@ -12,7 +12,7 @@ const UNSAFE_NAME = 'Family <img src=x onerror="window.__catalogXss=1"> & TV';
 const CATALOG = IDS.map((id, i) => ({ id, name: NAMES[i], show: true, iconPath: '' })).concat([
   { id: EXTRA, name: UNSAFE_NAME, show: true, iconPath: '' },
   { id: SPOTIFY, name: 'Spotify', show: true, iconPath: '' },
-  { id: 'nClrkHome1.FrameHome', name: 'CleanFrame', show: true },
+  { id: 'IToNIHVw90.CleanFrame', name: 'CleanFrame', show: true },
   { id: 'AbCdEf1234.worker', name: 'Background worker', show: true },
   { id: 'com.samsung.tv.cobalt-yt', name: 'YouTube', show: true }
 ]);
